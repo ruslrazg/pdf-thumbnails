@@ -8,6 +8,8 @@ use Illuminate\Support\Arr;
 class PdfController extends SiteController
 {
     //
+    protected $pd_rep;
+
     public function __construct()
     {
         parent::__construct();
