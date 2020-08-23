@@ -117,7 +117,7 @@ class PdfController extends SiteController
         $pdf = new Pdf($path);
         $pdf->setPage(1)->setOutputFormat(env('GS_FORMAT'))->saveImage($filename);
 
-        return redirect(route('index'));
+        return redirect()->route('home')->with(['success' => 'PDF Uploaded Successfully.']);
     }
 
     /**
@@ -129,6 +129,13 @@ class PdfController extends SiteController
     public function show($id)
     {
         //
+        $pdf = PdfDoc::find($id);
+        $content = view(env('THEME').'.pdf.modal')->with([
+                                                    'pdf' => $pdf,
+                                                    ])->render();
+        $this->vars = Arr::add($this->vars, 'content', $content);
+
+        return $this->renderOutput();
     }
 
     /**
@@ -163,5 +170,12 @@ class PdfController extends SiteController
     public function destroy($id)
     {
         //
+        $pdf = PdfDoc::find($id);
+        if (!$pdf) {
+            return redirect()->route('home')->with(['error' => 'Page not found !']);
+        }
+        $pdf->delete();
+
+        return redirect()->route('home')->with(['success' => 'PDF Deleted Successfully']);
     }
 }

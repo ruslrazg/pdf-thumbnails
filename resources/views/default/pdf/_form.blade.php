@@ -1,5 +1,5 @@
 <div class="col-md-6 offset-md-3 mt-5">
-   	<a href="{{ route('index')}}" class="btn btn-primary my-1">Back to main page</a>
+   	<a href="{{ route('home')}}" class="btn btn-primary my-1">Back to main page</a>
    	<h1>HTML Form with File Upload</h1>
 	@if ($errors->any())
 	    <div class="alert alert-danger">

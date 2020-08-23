@@ -13,4 +13,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::resource('/', 'PdfController');
+Route::resource('/', 'PdfController', [
+                                        'only' =>['index','create','show','store'],
+                                        'names'=> [
+                                            'index'=>'home',
+                                        ],
+                                        'parameters'=> [
+                                            '' => 'id'
+                                        ]
+                                    ]);
