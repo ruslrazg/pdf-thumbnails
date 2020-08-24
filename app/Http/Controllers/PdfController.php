@@ -7,7 +7,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 
 use App\PdfDoc;
-use App\Repositories\PdfDocsRepository;
+use App\Repositories\PdfRepository;
+
 
 use Spatie\PdfToImage\Pdf;
 use Org_Heigl\Ghostscript\Ghostscript;
@@ -15,34 +16,14 @@ use Org_Heigl\Ghostscript\Ghostscript;
 class PdfController extends SiteController
 {
     //
-    protected $pd_rep;
+    private $pdfRepository;
 
-    public function __construct(PdfDocsRepository $pdfdocs)
+    public function __construct()
     {
         parent::__construct();
-
-        $this->pd_rep = $pdfdocs;
+        $this->pdfRepository = app(PdfRepository::class);
 
         $this->template = config('settings.theme').'.index';
-    }
-
-    protected function getPdfDocs()
-    {
-        $pdfDocs = $this->pd_rep->get(['id','filename','description','hash','size'], config('settings.pdf_thumbnails_count'));
-        if (!$pdfDocs->isEmpty()) {
-            $pdfDocs->transform(
-                function ($item, $key) {
-                    $pdf_path = config('settings.storage_path.pdf').$item->hash;
-                    $item->hash = $pdf_path;
-                    $nameWithoutExtension = pathinfo($pdf_path, PATHINFO_FILENAME);
-                    $item->image = config('settings.storage_path.image').$nameWithoutExtension.'.'.config('settings.gs_format');
-                    $item->size = round($item->size/1024/1024, 2);
-                    return $item;
-                }
-            );
-        }
-
-        return $pdfDocs;
     }
 
     /**
@@ -54,7 +35,7 @@ class PdfController extends SiteController
     {
         //
         $text = "Some text here";
-        $pdfItems = $this->getPdfDocs();
+        $pdfItems = $this->pdfRepository->getAll();
 
         $content = view(config('settings.theme').'.pdf.content')->with([
                                                     'pdfs' => $pdfItems,
