@@ -14,7 +14,7 @@ class SiteController extends Controller
     public function __construct()
     {
         //
-        $this->template = env('THEME').'.layouts.app';
+        $this->template = config('settings.theme').'.layouts.app';
     }
 
     protected function renderOutput()

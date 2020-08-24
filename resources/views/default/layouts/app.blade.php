@@ -30,7 +30,7 @@
    }
  </style>
  <!-- Custom styles for this template -->
- <link href="{{ asset(env('THEME')) }}/album.css" rel="stylesheet">
+ <link href="{{ asset(config('settings.theme')) }}/album.css" rel="stylesheet">
   </head>
   <body>
 	<main role="main">

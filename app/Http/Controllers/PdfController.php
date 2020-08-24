@@ -6,8 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 
-use Config;
-
 use App\PdfDoc;
 use App\Repositories\PdfDocsRepository;
 
@@ -25,19 +23,19 @@ class PdfController extends SiteController
 
         $this->pd_rep = $pdfdocs;
 
-        $this->template = env('THEME').'.index';
+        $this->template = config('settings.theme').'.index';
     }
 
     protected function getPdfDocs()
     {
-        $pdfDocs = $this->pd_rep->get(['id','filename','description','hash','size'], Config::get('settings.pdf_thumbnails_count'));
+        $pdfDocs = $this->pd_rep->get(['id','filename','description','hash','size'], config('settings.pdf_thumbnails_count'));
         if (!$pdfDocs->isEmpty()) {
             $pdfDocs->transform(
                 function ($item, $key) {
-                    $pdf_path = Config::get('settings.storage_path.pdf').$item->hash;
+                    $pdf_path = config('settings.storage_path.pdf').$item->hash;
                     $item->hash = $pdf_path;
                     $nameWithoutExtension = pathinfo($pdf_path, PATHINFO_FILENAME);
-                    $item->image = Config::get('settings.storage_path.image').$nameWithoutExtension.'.'.env('GS_FORMAT');
+                    $item->image = config('settings.storage_path.image').$nameWithoutExtension.'.'.config('settings.gs_format');
                     $item->size = round($item->size/1024/1024, 2);
                     return $item;
                 }
@@ -58,7 +56,7 @@ class PdfController extends SiteController
         $text = "Some text here";
         $pdfItems = $this->getPdfDocs();
 
-        $content = view(env('THEME').'.pdf.content')->with([
+        $content = view(config('settings.theme').'.pdf.content')->with([
                                                     'pdfs' => $pdfItems,
                                                     'text'=> $text,
                                                     ])->render();
@@ -75,7 +73,7 @@ class PdfController extends SiteController
     public function create()
     {
         //
-        $content = view(env('THEME').'.pdf._form')->render();
+        $content = view(config('settings.theme').'.pdf._form')->render();
         $this->vars = Arr::add($this->vars, 'content', $content);
 
         return $this->renderOutput();
@@ -111,11 +109,11 @@ class PdfController extends SiteController
 
         //new instance for Ghostscript
         $gs = new Ghostscript();
-        $gs->setGsPath(env('GS_PATH'));
+        $gs->setGsPath(config('settings.gs_path'));
 
         //create image from pdf
         $pdf = new Pdf($path);
-        $pdf->setPage(1)->setOutputFormat(env('GS_FORMAT'))->saveImage($filename);
+        $pdf->setPage(1)->setOutputFormat(config('settings.gs_format'))->saveImage($filename);
 
         return redirect()->route('home')->with(['success' => 'PDF Uploaded Successfully.']);
     }
@@ -130,7 +128,7 @@ class PdfController extends SiteController
     {
         //
         $pdf = PdfDoc::find($id);
-        $content = view(env('THEME').'.pdf.modal')->with([
+        $content = view(config('settings.theme').'.pdf.modal')->with([
                                                     'pdf' => $pdf,
                                                     ])->render();
         $this->vars = Arr::add($this->vars, 'content', $content);

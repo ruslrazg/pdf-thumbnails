@@ -1,4 +1,4 @@
-@extends(env('THEME').'.layouts.app')
+@extends(config('settings.theme').'.layouts.app')
 
 @section('content')
 		{!! $content !!}
