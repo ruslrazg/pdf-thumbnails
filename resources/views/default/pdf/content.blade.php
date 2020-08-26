@@ -14,7 +14,7 @@
 	  @endif
 	<h1>{{ $text }}</h1>
 	<p>
-	  <a href="{{ route('create') }}" class="btn btn-primary my-2">add new document</a>
+	  <a href="{{ route('pdfs.create') }}" class="btn btn-primary my-2">add new document</a>
 	</p>
   </div>
 </section>
@@ -30,7 +30,12 @@
 				  <p class="card-text">{{ $pdf->description }}</p>
 				  <div class="d-flex justify-content-between align-items-center">
 					<div class="btn-group">
-					  <a href="{{ route('show', $pdf->id) }}" class="btn btn-sm btn-outline-secondary" role="button">View</a>
+					  <a href="{{ route('pdfs.show', $pdf->id) }}" class="btn btn-sm btn-outline-secondary" role="button">View</a>
+                        <form action="{{ route('pdfs.destroy', $pdf->id) }}" method="post">
+                            <input class="btn btn-sm btn-outline-secondary" type="submit" value="Del" />
+                            @method('delete')
+                            @csrf
+                        </form>
 					 </div>
 					<small class="text-muted">{{ $pdf->size }} Mb</small>
 				  </div>

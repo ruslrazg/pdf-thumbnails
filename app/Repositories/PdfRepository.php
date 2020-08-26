@@ -3,15 +3,20 @@
 namespace App\Repositories;
 
 use App\PdfDoc as Model;
-use Illuminate\Database\Eloquent\Collection;
 
 /**
- * [Description PdfRepository]
+ * Class PdfRepository
+ * @package App\Repositories
  */
 class PdfRepository extends CoreRepository
 {
     /**
-     * @return [type]
+     * @var string[]
+     */
+    private $columns = ['id','filename','description','hash','size'];
+
+    /**
+     * @return mixed|string
      */
     protected function getModelClass()
     {
@@ -19,44 +24,51 @@ class PdfRepository extends CoreRepository
     }
 
     /**
-     * @param mixed $id
-     *
-     * @return [type]
+     * @param $id
+     * @return mixed
      */
     public function getEdit($id)
     {
         return $this->startConditions()->find($id);
     }
 
+    /**
+     * @return mixed
+     */
     public function getAll()
     {
-        $data = $this->startConditions()->all();
-        //$pdfDocs = $this->pd_rep->get(['id','filename','description','hash','size'], config('settings.pdf_thumbnails_count'));
-        if (!$data->isEmpty()) {
-            $data->transform(
-                function ($item, $key) {
-                    $pdf_path = config('settings.storage_path.pdf').$item->hash;
-                    $item->hash = $pdf_path;
-                    $nameWithoutExtension = pathinfo($pdf_path, PATHINFO_FILENAME);
-                    $item->image = config('settings.storage_path.image').$nameWithoutExtension.'.'.config('settings.gs_format');
-                    $item->size = round($item->size/1024/1024, 2);
-                    return $item;
-                }
-            );
-        }
+        $items = $this->startConditions()->select($this->columns)->get();
+        $this->change($items);
 
-        return $data;
+        return $items;
     }
 
-    public function getWithLimit($limit = null)
+    /**
+     * @param null $perPage
+     * @return mixed
+     */
+    public function getWithPagination($perPage = null)
     {
-        $fields = ['id','filename','description','hash','size'];
+        $items = $this->startConditions()->select($this->columns)->paginate($perPage);
+        $this->change($items);
 
-        $result = $this
-            ->startConditions()
-            ->select($fields);
-        //->take($limit);
+        return $items;
+    }
 
-        return $result;
+
+    /**
+     * @param $items
+     */
+    private function change($items){
+        if (!$items->isEmpty() ) {
+            $items->transform(function ($item, $key) {
+                $pdf_path = config('settings.storage_path.pdf') . $item->hash;
+                $item->hash = $pdf_path;
+                $nameWithoutExtension = pathinfo($pdf_path, PATHINFO_FILENAME);
+                $item->image = config('settings.storage_path.image') . $nameWithoutExtension . '.' . config('settings.gs_format');
+                $item->size = round($item->size / 1024 / 1024, 2);
+                return $item;
+            });
+        }
     }
 }

@@ -13,12 +13,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::resource('/', 'PdfController', [
-                                        'only' =>['index','create','show','store'],
-                                        'names'=> [
-                                            'index'=>'home',
-                                        ],
-                                        'parameters'=> [
-                                            '' => 'id'
-                                        ]
-                                    ]);
+//Route::resource('/','PdfController',['only' =>['index'],'names'=> ['index'=>'home']]);
+
+
+Route::resource('/pdfs','PdfController')->except([
+    'update'
+]);
+Route::get('/', 'PdfController@index')->name('home');
+
+//Route::resource('/','PdfController',['only' =>['index'],'names'=> ['index'=>'home']]);
+
+
+//Route::resources([
+ //   'pdfs'=>'PdfController',
+//]);
+

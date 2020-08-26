@@ -13,15 +13,26 @@ use App\Repositories\PdfRepository;
 use Spatie\PdfToImage\Pdf;
 use Org_Heigl\Ghostscript\Ghostscript;
 
+/**
+ * Class PdfController
+ * @package App\Http\Controllers
+ */
 class PdfController extends SiteController
 {
     //
-    private $pdfRepository;
 
+    /**
+     * @var PdfRepository|\Illuminate\Contracts\Foundation\Application|mixed
+     */
+    protected $model;
+
+    /**
+     * PdfController constructor.
+     */
     public function __construct()
     {
         parent::__construct();
-        $this->pdfRepository = app(PdfRepository::class);
+        $this->model = app(PdfRepository::class);
 
         $this->template = config('settings.theme').'.index';
     }
@@ -35,7 +46,8 @@ class PdfController extends SiteController
     {
         //
         $text = "Some text here";
-        $pdfItems = $this->pdfRepository->getAll();
+        $pdfItems = $this->model->getAll();
+        //$pdfItems = $this->pdfRepository->getWithPagination(3);
 
         $content = view(config('settings.theme').'.pdf.content')->with([
                                                     'pdfs' => $pdfItems,
@@ -81,12 +93,15 @@ class PdfController extends SiteController
         $myFile = config('settings.storage_path.pdf').$file->hashName();
         $filename = pathinfo($myFile, PATHINFO_FILENAME);
 
-        $record = new PdfDoc();
-        $record->filename = $file->getClientOriginalName();
-        $record->description = $request->input('description');
-        $record->hash = $file->hashName();
-        $record->size = $file->getSize();
-        $record->save();
+        $pdf = new PdfDoc();
+
+        $pdf->filename = $file->getClientOriginalName();
+        $pdf->description = $request->input('description');
+        $pdf->hash = $file->hashName();
+        $pdf->size = $file->getSize();
+        if (!$pdf->save()){
+            return redirect()->back()->with(['error' => 'PDF Uploaded Canceled.']);
+        }
 
         //new instance for Ghostscript
         $gs = new Ghostscript();
@@ -108,13 +123,12 @@ class PdfController extends SiteController
     public function show($id)
     {
         //
-        $pdf = PdfDoc::find($id);
-        $content = view(config('settings.theme').'.pdf.modal')->with([
-                                                    'pdf' => $pdf,
-                                                    ])->render();
-        $this->vars = Arr::add($this->vars, 'content', $content);
+        $item = $this->model->getEdit($id);
+        return $item;
+        //$content = view(config('settings.theme').'.pdf.modal')->with([ 'item' => $item, ])->render();
+        //$this->vars = Arr::add($this->vars, 'content', $content);
 
-        return $this->renderOutput();
+        //return $this->renderOutput();
     }
 
     /**
@@ -126,6 +140,13 @@ class PdfController extends SiteController
     public function edit($id)
     {
         //
+        $item = $this->model->getEdit($id);
+        if(empty($item))
+        {
+            abort(404);
+        }
+
+        return $item;
     }
 
     /**
@@ -148,13 +169,7 @@ class PdfController extends SiteController
      */
     public function destroy($id)
     {
-        //
-        $pdf = PdfDoc::find($id);
-        if (!$pdf) {
-            return redirect()->route('home')->with(['error' => 'Page not found !']);
-        }
-        $pdf->delete();
-
+        $record = $this->model->delete($id);
         return redirect()->route('home')->with(['success' => 'PDF Deleted Successfully']);
     }
 }

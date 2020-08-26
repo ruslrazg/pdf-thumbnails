@@ -10,7 +10,7 @@
 	        </ul>
 	    </div>
 	@endif
-   	<form accept-charset="UTF-8" action="{{ route('store')}}" method="POST" enctype="multipart/form-data">
+   	<form accept-charset="UTF-8" action="{{ route('pdfs.store')}}" method="POST" enctype="multipart/form-data">
 	   @csrf
 	 <div class="form-group">
 	   <label for="exampleInputName">Short file name</label>
