@@ -55,7 +55,6 @@ class PdfRepository extends CoreRepository
         return $items;
     }
 
-
     /**
      * @param $items
      */
