@@ -14,7 +14,7 @@
 	   @csrf
 	 <div class="form-group">
 	   <label for="exampleInputName">Short file name</label>
-	   <input type="text" name="description" class="form-control" id="exampleInputName" placeholder="Enter short description">
+	   <input type="text" name="description" class="form-control" id="exampleInputName" placeholder="Enter short description" required>
 	 </div>
 	 <hr>
 	 <div class="form-group mt-3">

@@ -24,7 +24,7 @@ class PdfController extends SiteController
     /**
      * @var PdfRepository|\Illuminate\Contracts\Foundation\Application|mixed
      */
-    protected $model;
+    private $model;
 
     /**
      * PdfController constructor.
@@ -32,6 +32,7 @@ class PdfController extends SiteController
     public function __construct()
     {
         parent::__construct();
+
         $this->model = app(PdfRepository::class);
 
         $this->template = config('settings.theme').'.index';
@@ -46,9 +47,9 @@ class PdfController extends SiteController
     {
         //
         $text = "Some text here";
-        $pdfItems = $this->model->getAll();
-        //$pdfItems = $this->pdfRepository->getWithPagination(3);
-
+        //$pdfItems = $this->model->getAll();
+        $pdfItems = $this->model->getWithPagination(20);
+        //dd($pdfItems);
         $content = view(config('settings.theme').'.pdf.content')->with([
                                                     'pdfs' => $pdfItems,
                                                     'text'=> $text,
@@ -65,7 +66,6 @@ class PdfController extends SiteController
      */
     public function create()
     {
-        //
         $content = view(config('settings.theme').'.pdf._form')->render();
         $this->vars = Arr::add($this->vars, 'content', $content);
 
@@ -99,8 +99,8 @@ class PdfController extends SiteController
         $pdf->description = $request->input('description');
         $pdf->hash = $file->hashName();
         $pdf->size = $file->getSize();
-        if (!$pdf->save()){
-            return redirect()->back()->with(['error' => 'PDF Uploaded Canceled.']);
+        if (!$pdf->save()) {
+            return redirect()->back()->with(['error' => 'PDF Upload is Failed.']);
         }
 
         //new instance for Ghostscript
@@ -123,12 +123,6 @@ class PdfController extends SiteController
     public function show($id)
     {
         //
-        $item = $this->model->getEdit($id);
-        return $item;
-        //$content = view(config('settings.theme').'.pdf.modal')->with([ 'item' => $item, ])->render();
-        //$this->vars = Arr::add($this->vars, 'content', $content);
-
-        //return $this->renderOutput();
     }
 
     /**
@@ -139,10 +133,8 @@ class PdfController extends SiteController
      */
     public function edit($id)
     {
-        //
         $item = $this->model->getEdit($id);
-        if(empty($item))
-        {
+        if (empty($item)) {
             abort(404);
         }
 
@@ -169,7 +161,9 @@ class PdfController extends SiteController
      */
     public function destroy($id)
     {
-        $record = $this->model->delete($id);
+        $item = $this->model->getEdit($id);
+        $item->delete();
+        
         return redirect()->route('home')->with(['success' => 'PDF Deleted Successfully']);
     }
 }
